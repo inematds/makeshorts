@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MakeShorts — Fábrica de Shorts com IA</title>
+<meta name="description" content="Skill do Claude Code que transforma tema, link ou clipe em short publicado: roteiro, voz ou avatar, b-roll, edição 9:16, QA e agendamento. Local ou em VPS com APIs.">
+<link rel="alternate" hreflang="pt-BR" href="https://inematds.github.io/makeshorts/guia/">
+<link rel="alternate" hreflang="en" href="https://inematds.github.io/makeshorts/guia/en/">
+<link rel="alternate" hreflang="es" href="https://inematds.github.io/makeshorts/guia/es/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0c10; --bg2:#14141b; --card:#16161e; --line:#272730;
+    --txt:#e9e9ee; --mut:#9a9aa6; --amb:#E2A23B; --amb2:#f0c070; --sky:#38bdf8; --pro:#cbd5e1;
+    color-scheme:dark;
+  }
+  body.light{
+    --bg:#f6f7f9; --bg2:#eceef2; --card:#ffffff; --line:#e1e3ea;
+    --txt:#1a1a22; --mut:#5b5b68; --amb:#b9791d; --amb2:#a16207; --sky:#0369a1; --pro:#b45309;
+    color-scheme:light;
+  }
+  body.light .hero .glow{opacity:.5}
+  body.light pre{background:#0e0e14;color:#d6d6e0}
+  body.light pre .c{color:#8a8a98}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.65 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:Sora,sans-serif;line-height:1.15;margin:0}
+  a{color:var(--amb);text-decoration:none}
+  code,pre{font-family:"JetBrains Mono",monospace}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 22px}
+  .mut{color:var(--mut)} .amb{color:var(--amb)}
+  .chip{display:inline-block;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--amb);font-weight:600;font-family:Sora}
+  nav{position:sticky;top:0;z-index:30;backdrop-filter:blur(12px);background:rgba(12,12,16,.78);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;gap:22px;height:60px}
+  nav .brand{display:flex;align-items:center;gap:8px;font-family:Sora;font-weight:800;letter-spacing:-.02em;color:var(--amb)}
+  nav .brand .emoji{font-size:1.25rem}
+  nav .sep{color:var(--mut);opacity:.45}
+  nav .inema{color:var(--sky);font-weight:600;font-size:.88rem;font-family:Sora}
+  nav .inema:hover{filter:brightness(1.15)}
+  nav .pro{color:var(--pro);font-weight:600;font-size:.88rem;font-family:Sora}
+  nav .pro:hover{filter:brightness(1.15)}
+  nav .clubpro{display:inline-flex;align-items:center;gap:6px}
+  nav .links{margin-left:auto;display:flex;align-items:center;gap:20px;font-size:.92rem}
+  nav .links a.sec{color:var(--mut)} nav .links a.sec:hover{color:var(--txt)}
+  .lang{display:inline-flex;gap:2px;font-family:Sora;font-size:.78rem}
+  .lang a{color:var(--mut);padding:.2em .45em;border-radius:6px} .lang a.on{color:var(--amb);background:rgba(226,162,59,.12)}
+  .tgl{background:var(--bg2);border:1px solid var(--line);color:var(--txt);width:38px;height:38px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:1.05rem}
+  .tgl:hover{border-color:var(--amb)}
+  .btn{display:inline-block;background:var(--amb);color:#1a1206;font-weight:600;padding:.6em 1.05em;border-radius:10px;font-family:Sora}
+  .btn.ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
+  @media(max-width:760px){nav .links a.sec{display:none}}
+  @media(max-width:520px){nav .wrap{gap:8px;padding:8px 14px;height:auto;flex-wrap:wrap} nav .links{gap:8px;margin-left:0;width:100%;justify-content:space-between} nav .btn{padding:.45em .7em;font-size:.82rem} .tgl{width:34px;height:34px}}
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+  .hero .glow{position:absolute;inset:-40% -20% auto auto;width:70%;height:600px;background:radial-gradient(closest-side,rgba(226,162,59,.22),transparent 70%);pointer-events:none}
+  .hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:74px 22px}
+  .hero h1{font-size:clamp(2.2rem,5vw,3.5rem);font-weight:800;letter-spacing:-.025em}
+  .hero p.lead{font-size:1.18rem;color:var(--mut);margin:1.1em 0 1.6em;max-width:34ch}
+  .hero .cta{display:flex;gap:12px;flex-wrap:wrap}
+  .hero figure{margin:0;border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 30px 80px -30px #000}
+  .hero figure img{width:100%;display:block}
+  @media(max-width:780px){.hero .wrap{grid-template-columns:1fr;padding:48px 22px}}
+  section{padding:62px 0;border-bottom:1px solid var(--line)}
+  section h2{font-size:clamp(1.5rem,3.4vw,2.1rem);font-weight:800;letter-spacing:-.02em}
+  section .sub{color:var(--mut);margin:.6em 0 2em;max-width:62ch}
+  .grid{display:grid;gap:16px}
+  .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:820px){.g3,.g4{grid-template-columns:1fr 1fr}}
+  @media(max-width:540px){.g2,.g3,.g4{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .card h3{font-size:1.05rem;margin-bottom:.4em}
+  .card p{color:var(--mut);font-size:.92rem;margin:0}
+  .num{display:inline-flex;width:30px;height:30px;align-items:center;justify-content:center;border-radius:8px;background:rgba(226,162,59,.14);color:var(--amb);font-family:Sora;font-weight:800;font-size:.9rem;margin-bottom:.7em}
+  .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+  .flow span{background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:.45em .9em;font-size:.85rem;font-family:Sora;font-weight:600}
+  .flow .arr{color:var(--amb);border:none;background:none;padding:0 .1em}
+  pre{background:#0a0a0e;border:1px solid var(--line);border-radius:12px;padding:16px 18px;overflow:auto;font-size:.86rem;line-height:1.6;color:#d6d6e0}
+  pre .c{color:#6f6f7c} pre .k{color:var(--amb2)} pre .s{color:#9ece6a}
+  .step{display:grid;grid-template-columns:46px 1fr;gap:16px;margin-bottom:26px}
+  .step .b{width:46px;height:46px;border-radius:12px;background:var(--amb);color:#1a1206;font-family:Sora;font-weight:800;font-size:1.25rem;display:flex;align-items:center;justify-content:center}
+  .step h3{font-size:1.12rem;margin-bottom:.3em}
+  .step p{color:var(--mut);margin:.2em 0 .7em}
+  .ex{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:680px){.ex{grid-template-columns:1fr}}
+  .ex figure{margin:0;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+  .ex figure img{width:100%;display:block}
+  .ex figcaption{padding:12px 14px;font-size:.88rem;color:var(--mut);background:var(--card)}
+  .phase{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--line)}
+  .phase:last-child{border:none}
+  .phase .tag{flex:0 0 92px;font-family:Sora;font-weight:800;color:var(--amb)}
+  .phase .d strong{display:block;margin-bottom:.2em}
+  .phase .d span{color:var(--mut);font-size:.92rem}
+  footer{padding:46px 0;text-align:center;color:var(--mut);font-size:.9rem}
+  .pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:.3em .8em;font-size:.78rem;color:var(--mut);margin:0 4px}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <a class="brand" href="#top"><span class="emoji">🎬</span> MakeShorts</a>
+  <span class="sep">|</span>
+  <span class="clubpro">
+    <a class="inema" href="https://inema.club" target="_blank" rel="noopener">INEMA.CLUB</a>
+    <span class="sep">-</span>
+    <a class="pro" href="https://inema.pro" target="_blank" rel="noopener">PRO</a>
+  </span>
+  <div class="links">
+    <a class="sec" href="#oque">O que é</a>
+    <a class="sec" href="#fluxo">Como funciona</a>
+    <a class="sec" href="#guia">Guia de uso</a>
+    <a class="sec" href="#vps">VPS</a>
+    <a class="sec" href="#roadmap">Roadmap</a>
+    <span class="lang"><a class="on" href="./">PT</a><a href="en/">EN</a><a href="es/">ES</a></span>
+    <button class="tgl" id="themeToggle" aria-label="Alternar tema" title="Alternar tema">🌙</button>
+    <a class="btn" href="https://github.com/inematds/makeshorts" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</div></nav>
+
+<header class="hero" id="top">
+  <div class="glow"></div>
+  <div class="wrap">
+    <div>
+      <span class="chip">Skill do Claude Code · Reels · TikTok · Shorts</span>
+      <h1>Do tema ao short <span class="amb">publicado</span>, numa conversa só</h1>
+      <p class="lead">Roteiro em 3 atos, voz ou avatar, b-roll real, edição vertical, portão de qualidade e agendamento nas redes — local com GPU ou numa VPS só com APIs.</p>
+      <div class="cta">
+        <a class="btn" href="#guia">Começar o guia</a>
+        <a class="btn ghost" href="https://github.com/inematds/makeshorts" target="_blank" rel="noopener">Ver no GitHub</a>
+      </div>
+    </div>
+    <figure><img src="assets/banner.jpg" alt="Banner do MakeShorts: fábrica de shorts com IA"></figure>
+  </div>
+</header>
+
+<section id="oque"><div class="wrap">
+  <span class="chip">O que é</span>
+  <h2>Uma fábrica de shorts dentro do Claude Code</h2>
+  <p class="sub">MakeShorts é uma skill (<code>/makeshorts</code>) com scripts de apoio. Você entrega um tema, um link ou um clipe gravado; ela devolve o short editado, conferido e pronto para agendar.</p>
+  <div class="grid g3">
+    <div class="card"><h3>🧩 Orquestra, não reinventa</h3><p>Chama o que já funciona: HyperFrames para editar, inemavox para voz e transcrição, HeyGen para avatar, Metricool para agendar.</p></div>
+    <div class="card"><h3>📐 Fórmula fixa, tema variável</h3><p>Todo short segue gancho → gancho secundário → 3 passos → CTA. Três versões de roteiro para você escolher.</p></div>
+    <div class="card"><h3>✅ Qualidade medida</h3><p>Nada sai sem passar pelo <code>qa_short.py</code>: duração, formato 1080x1920, loudness, gancho visual, hashtags e CTA.</p></div>
+  </div>
+</div></section>
+
+<section id="fluxo"><div class="wrap">
+  <span class="chip">Como funciona</span>
+  <h2>Sete etapas, um pedido</h2>
+  <p class="sub">Cada etapa pode ser feita sozinha (os 5 modos) ou em sequência. As que custam dinheiro ou publicam sempre pedem sua confirmação.</p>
+  <div class="flow">
+    <span>Roteiro</span><span class="arr">→</span>
+    <span>Voz ou avatar</span><span class="arr">→</span>
+    <span>B-roll real</span><span class="arr">→</span>
+    <span>Edição 9:16</span><span class="arr">→</span>
+    <span>QA</span><span class="arr">→</span>
+    <span>Agendar</span><span class="arr">→</span>
+    <span>Funil de DM</span>
+  </div>
+  <div class="grid g4" style="margin-top:26px">
+    <div class="card"><div class="num">1</div><h3>Roteiro</h3><p>~75 palavras, gancho em 3 s, fatos só de fonte oficial, 3 versões.</p></div>
+    <div class="card"><div class="num">2</div><h3>Voz / rosto</h3><p>Gravação humana, voz sintética (local ou API) ou avatar HeyGen.</p></div>
+    <div class="card"><div class="num">3</div><h3>Edição</h3><p>Visual em cima, rosto embaixo, legenda palavra a palavra, punch-in e SFX.</p></div>
+    <div class="card"><div class="num">4</div><h3>Publicação</h3><p>Legenda com benefício, até 5 hashtags, rótulo de IA, Metricool.</p></div>
+  </div>
+</div></section>
+
+<section id="pre"><div class="wrap">
+  <span class="chip">Pré-requisitos</span>
+  <h2>O que precisa estar na máquina</h2>
+  <p class="sub">O básico roda em qualquer Linux ou Mac. GPU e inemavox são opcionais: sem eles, troque os backends por API (veja <a href="#vps">VPS</a>).</p>
+  <div class="grid g3">
+    <div class="card"><h3>Claude Code</h3><p>Pela assinatura. É onde a skill roda.</p><pre><span class="k">npm</span> i -g @anthropic-ai/claude-code</pre></div>
+    <div class="card"><h3>ffmpeg + Python + Node</h3><p>Edição, QA e o motor HyperFrames.</p><pre><span class="k">sudo apt</span> install -y ffmpeg python3 nodejs</pre></div>
+    <div class="card"><h3>HyperFrames</h3><p>Motor de edição em HTML → MP4, roda em CPU.</p><pre><span class="k">npx</span> hyperframes skills update general-video</pre></div>
+  </div>
+</div></section>
+
+<section id="guia"><div class="wrap">
+  <span class="chip">Guia de uso · passo a passo</span>
+  <h2>Do clone ao primeiro short</h2>
+  <p class="sub">Cinco passos. Os comandos são os do repositório, prontos para copiar.</p>
+
+  <div class="step"><div class="b">1</div><div>
+    <h3>Clone e instale</h3>
+    <p>O instalador confere dependências, liga a skill em <code>~/.claude/skills/makeshorts</code> (symlink) e cria o <code>.env</code>.</p>
+<pre><span class="k">git clone</span> <span class="s">https://github.com/inematds/makeshorts.git</span> && cd makeshorts
+<span class="k">bash</span> scripts/instalar.sh --check   <span class="c"># só confere</span>
+<span class="k">bash</span> scripts/instalar.sh           <span class="c"># instala a skill + cria .env</span></pre>
+  </div></div>
+
+  <div class="step"><div class="b">2</div><div>
+    <h3>Escolha os backends no <code>.env</code></h3>
+    <p>Uma linha por etapa. Na máquina com GPU fica tudo local; em outro lugar, troque por API.</p>
+<pre><span class="k">MS_VOZ</span>=inemavox          <span class="c"># inemavox | edge | openai | elevenlabs</span>
+<span class="k">MS_TRANSCRICAO</span>=inemavox  <span class="c"># inemavox | groq | openai</span>
+<span class="k">MS_IMAGEM</span>=flux-local     <span class="c"># flux-local | nenhuma</span>
+<span class="k">MS_AVATAR</span>=nenhum         <span class="c"># heygen | nenhum</span>
+<span class="k">MS_PUBLICAR</span>=metricool   <span class="c"># metricool | manual</span></pre>
+  </div></div>
+
+  <div class="step"><div class="b">3</div><div>
+    <h3>Peça o short</h3>
+    <p>No Claude Code, chame a skill ou fale naturalmente. Ela descobre o modo pelo pedido.</p>
+<pre><span class="k">/makeshorts</span> <span class="s">3 roteiros sobre o Claude Code no celular</span>        <span class="c"># modo roteiro</span>
+<span class="k">/makeshorts</span> <span class="s">edita ~/Downloads/clip.mp4</span>                        <span class="c"># modo humano</span>
+<span class="k">/makeshorts</span> <span class="s">short sobre https://site-da-ferramenta, sem gravar</span> <span class="c"># modo IA</span>
+<span class="k">/makeshorts</span> <span class="s">5 shorts de IA grátis da semana, um por dia às 18h</span> <span class="c"># modo lote</span></pre>
+  </div></div>
+
+  <div class="step"><div class="b">4</div><div>
+    <h3>Passe pelo portão de QA</h3>
+    <p>A skill roda sozinha, mas você pode rodar à mão. Exit 1 reprova e diz o que corrigir.</p>
+<pre><span class="k">python3</span> .claude/skills/makeshorts/scripts/qa_short.py final.mp4 --caption legenda.txt
+<span class="c">✅ duração        31.2s
+✅ formato        1080x1920
+✅ loudness       -14.1 LUFS
+✅ gancho visual  sem tela preta no início
+✅ hashtags       4: #claudecode #ia #automacao #shorts
+RESULTADO: APROVADO</span></pre>
+  </div></div>
+
+  <div class="step"><div class="b">5</div><div>
+    <h3>Agende e ligue o funil</h3>
+    <p>A skill monta legenda e hashtags, mostra tudo e só agenda no Metricool depois do seu "pode". O CTA "Comenta IA" vira DM automática com o link (ManyChat, configurado uma vez).</p>
+<pre><span class="k">/makeshorts</span> <span class="s">publica final.mp4 no Instagram, TikTok e Shorts no melhor horário</span></pre>
+  </div></div>
+</div></section>
+
+<section id="vps"><div class="wrap">
+  <span class="chip">Rodar numa VPS</span>
+  <h2>Sem GPU, sem voz local: só muda o <code>.env</code></h2>
+  <p class="sub">Nenhum código muda. Os scripts <code>voz.py</code> e <code>transcreve.py</code> leem o backend do <code>.env</code> e chamam a API certa.</p>
+  <div class="grid g2">
+    <div class="card"><h3>🖥️ Máquina com GPU</h3><p>Voz: <code>inemavox</code> (chatterbox, voz clonada local) · Transcrição: <code>inemavox</code> (Whisper large-v3) · Imagem: <code>flux-local</code>.</p></div>
+    <div class="card"><h3>☁️ VPS</h3><p>Voz: <code>edge</code> (grátis), <code>openai</code> ou <code>elevenlabs</code> (sua voz clonada) · Transcrição: <code>groq</code> ou <code>openai</code> · Imagem: <code>nenhuma</code> (b-roll real).</p></div>
+  </div>
+<pre style="margin-top:18px"><span class="c"># .env típico de VPS</span>
+<span class="k">MS_VOZ</span>=edge
+<span class="k">EDGE_VOZ</span>=pt-BR-AntonioNeural
+<span class="k">MS_TRANSCRICAO</span>=groq
+<span class="k">GROQ_API_KEY</span>=gsk_...
+<span class="k">MS_IMAGEM</span>=nenhuma
+
+<span class="c"># testar cada peça</span>
+<span class="k">python3</span> scripts/voz.py --texto <span class="s">"Teste de voz."</span> --out /tmp/t.mp3
+<span class="k">python3</span> scripts/transcreve.py --in /tmp/t.mp3 --outdir /tmp/tr</pre>
+  <p class="sub" style="margin-top:14px">Instalação completa no Ubuntu, custos de referência e uso com tmux: <a href="https://github.com/inematds/makeshorts/blob/main/docs/vps.md" target="_blank" rel="noopener">docs/vps.md</a>.</p>
+</div></section>
+
+<section id="exemplos"><div class="wrap">
+  <span class="chip">Exemplos</span>
+  <h2>A fórmula do roteiro</h2>
+  <p class="sub">Um short de 30 segundos, ato por ato. Mesma espinha, qualquer tema.</p>
+  <div class="grid g4">
+    <div class="card"><span class="chip">0–3s</span><h3>Gancho</h3><p>"Tem uma IA nova que edita teus vídeos sozinha."</p></div>
+    <div class="card"><span class="chip">3–8s</span><h3>Gancho secundário</h3><p>"E não é o CapCut. Nem o Premiere."</p></div>
+    <div class="card"><span class="chip">8–28s</span><h3>Entrega</h3><p>"Passo 1… passo 2… passo 3…" — direto, sem enrolação.</p></div>
+    <div class="card"><span class="chip">28s+</span><h3>CTA</h3><p>"Comenta IA que eu te mando o passo a passo."</p></div>
+  </div>
+</div></section>
+
+<section id="roadmap"><div class="wrap">
+  <span class="chip">Roadmap</span>
+  <h2>O que já existe e o que vem</h2>
+  <p class="sub">Descrevemos só o que está no repositório; o resto é plano.</p>
+  <div class="phase"><div class="tag">v1 ✅</div><div class="d"><strong>Skill + QA + backends</strong><span>Skill orquestradora, fórmula de roteiro, spec visual, qa_short.py, voz.py e transcreve.py com backends local/API, guia de VPS.</span></div></div>
+  <div class="phase"><div class="tag">Próximo</div><div class="d"><strong>Captura de b-roll automatizada</strong><span>Script próprio para gravar rolagem de site e GitHub em 1080x960, pronto para a metade de cima.</span></div></div>
+  <div class="phase"><div class="tag">Depois</div><div class="d"><strong>Painel de métricas</strong><span>Relatório semanal a partir do Metricool: quais ganchos e temas trouxeram mais views e comentários.</span></div></div>
+</div></section>
+
+<footer>
+  <div class="wrap">
+    <div class="pill">Claude Code</div><div class="pill">HyperFrames</div><div class="pill">ffmpeg</div><div class="pill">inemavox</div><div class="pill">Metricool</div>
+    <p style="margin-top:18px">MakeShorts · projeto aberto e gratuito ·
+      <a href="https://github.com/inematds/makeshorts">inematds/makeshorts</a> ·
+      <a href="https://inema.club">INEMA.CLUB</a></p>
+  </div>
+</footer>
+
+<script>
+  (function(){
+    var KEY='makeshorts-theme';
+    var b=document.body, t=document.getElementById('themeToggle');
+    if(localStorage.getItem(KEY)==='light'){ b.classList.add('light'); t.textContent='☀️'; }
+    t.addEventListener('click',function(){
+      var light=b.classList.toggle('light');
+      t.textContent=light?'☀️':'🌙';
+      localStorage.setItem(KEY, light?'light':'dark');
+    });
+  })();
+</script>
+</body>
+</html>

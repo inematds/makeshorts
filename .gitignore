@@ -1,0 +1,17 @@
+# material do curso de origem — só local, nunca publicar
+videos/
+transcricoes/
+aulas/
+raw/
+ANALISE.md
+# saídas de trabalho
+out/
+output/
+*.mp4
+*.wav
+*.mp3
+__pycache__/
+.DS_Store
+
+# segredos
+.env
