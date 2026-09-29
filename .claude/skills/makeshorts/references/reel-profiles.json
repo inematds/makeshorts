@@ -1,0 +1,20 @@
+{
+  "_doc": "Contrato único de reel (< 2 min). Lido por scripts/qa_short.py e pelo explicavideos (engine/v2, config \"profile\"). Explicação em spec-reel.md. Proporção (9:16) NÃO define o perfil: o perfil é escolha editorial.",
+  "version": "1.0.0",
+  "common": {
+    "video": {"width": 1080, "height": 1920, "fps": 30, "codec": "h264", "audio_codec": "aac"},
+    "audio": {"lufs": -14, "lufs_tolerance": 1, "true_peak_max": -1},
+    "opening": {"black_max_s": 0.3, "hook_spoken_max_s": 2, "proof_max_s": 5},
+    "captions": {"max_words": 3, "min_font_px": 64, "max_chars": 22, "min_cue_s": 0.25},
+    "safe_area": {"top": 0.10, "bottom": 0.20, "sides": 0.06, "right_ui_column": 0.12},
+    "rhythm": {"change_target_s": [2, 4], "static_review_s": 4},
+    "cta": {"single": true, "kinds": ["comente", "comenta", "comment", "manda", "envie", "compartilhe", "salva", "salve", "link na bio", "acesse", "inema.club"]},
+    "blocking": ["duration_max", "format", "fps", "codec", "audio_present", "loudness", "measurement_missing", "black_start", "captions_max_words", "captions_overlap"],
+    "review": ["duration_ideal", "true_peak", "frame0_information", "static_gaps", "cta_text"]
+  },
+  "profiles": {
+    "divulgacao": {"label": "Gancho/divulgação", "duration": {"min": 15, "ideal": [20, 35], "max": 59}, "words": [60, 90], "structure": ["gancho", "prova", "cta"]},
+    "tutorial":   {"label": "Tutorial curto",    "duration": {"min": 25, "ideal": [35, 60], "max": 75}, "words": [90, 150], "structure": ["gancho", "3 passos", "cta"]},
+    "mini-aula":  {"label": "Mini-aula",         "duration": {"min": 45, "ideal": [60, 110], "max": 119}, "words": [150, 280], "structure": ["gancho", "loop aberto", "3-5 pontos com micro-gancho a cada ~20 s", "fecha o loop", "cta"]}
+  }
+}

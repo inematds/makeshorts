@@ -12,8 +12,13 @@ description: >-
 
 Você orquestra a produção de um short vertical do tema até o post agendado. **Não reinvente etapas
 que outras skills já fazem** — chame-as pelo nome. O que é próprio desta skill: a fórmula de roteiro
-(`references/roteiro.md`), a especificação visual (`references/spec-visual.md`), o portão de QA
+(`references/roteiro.md`), o **contrato de reel** (`references/reel-profiles.json`, explicado em
+`references/spec-reel.md`), a especificação visual (`references/spec-visual.md`), o portão de QA
 (`scripts/qa_short.py`) e as regras de publicação (`references/publicar.md`).
+
+**Antes de produzir:** confira e registre o tema em `~/projetos/wifi/PRODUCOES-VIDEO.md` (tema, dono, pasta,
+estado). Em 28/09/2026 duas sessões fizeram os mesmos 9 shorts em paralelo — o registro evita isso.
+**Perfil:** escolha `divulgacao`, `tutorial` ou `mini-aula` (duração, palavras e estrutura no contrato).
 
 ## Modos
 
@@ -29,8 +34,9 @@ Descubra o modo pelo pedido; se não der, pergunte em texto livre (nunca menu).
 
 ## Pipeline (modo 3 completo)
 
-1. **Roteiro** — siga `references/roteiro.md`: 3 versões, ~75 palavras (≈30 s), gancho em 3 s, gancho
-   secundário de curiosidade, entrega em 3 passos, CTA "comente PALAVRA". Fatos só de fonte oficial
+1. **Roteiro** — siga `references/roteiro.md`: 3 versões com ganchos diferentes, palavras e estrutura do
+   **perfil** escolhido (divulgação ≈ 60–90 palavras), gancho falado ≤ 2 s e já escrito na tela do frame 0,
+   gancho secundário entre 3 e 8 s, **uma promessa por reel**, CTA único. Fatos só de fonte oficial
    (site/GitHub do tema) — abra e confira antes de escrever. Para o tom INEMA, a skill
    **`roteirista-inema`** pode refinar a versão escolhida. **Mostre as 3 e deixe o usuário escolher.**
 2. **Voz / rosto** — três opções, da mais barata para a mais cara:
@@ -47,17 +53,24 @@ Descubra o modo pelo pedido; se não der, pergunte em texto livre (nunca menu).
    suave (skills **`agent-browser`** / **`website-intelligence`**), demos/GIFs oficiais. Mostrar a
    ferramenta funcionando vence card de texto. Imagem gerada só se faltar material real
    (flux2-klein local via `inemaimg`).
-4. **Edição** — vertical 1080x1920 seguindo `references/spec-visual.md`. Motores, em ordem:
-   - avatar/fala 16:9 → **`reel-edita-inema`** (reel empilhado INEMA);
-   - clipe vertical cru → **`reel-edita-inematds`** (corta silêncio/repetição, PiP, b-roll, SFX);
-   - composição livre → **`hyperframes`** + **`general-video`**;
-   - legendas palavra-a-palavra → **`embedded-captions`**.
-   SFX e música: inemavox (`sfx_v1.py --query whoosh --outdir <ws>/sfx`). **Shorts didáticos não levam
-   música de fundo** — só SFX curtos.
+4. **Edição** — vertical 1080x1920 seguindo `spec-reel.md` + `spec-visual.md`. Motores, em ordem:
+   - **avatar do Nei (HeyGen) → `~/projetos/explicavideos` 9:16** com `"reel_profile"` na config (2.4.3+):
+     shot `hook` visível no frame 0, shot `media` com o print real do site/curso, legenda de até 3 palavras,
+     30 fps, −14 LUFS e este QA rodando sozinho no `produce.py`. É o caminho padrão para divulgação INEMA.
+   - gravação humana 16:9 → **`reel-edita-inema`**; clipe vertical cru → **`reel-edita-inematds`**;
+   - sem rosto e sem crédito de avatar → **`hyperframes`** + **`general-video`**, com prova real (gravação de
+     tela/print) — nunca só cards de texto; gravação de 30 s no celular é alternativa melhor que sem rosto;
+   - legendas palavra-a-palavra em vídeo pronto → **`embedded-captions`**.
+   - **`video-explicativo` NÃO faz reel** (é explicativo 16:9 de 1–3 min).
+   SFX e música: inemavox (`sfx_v1.py --query whoosh --outdir <ws>/sfx`). **Reel didático sem música de fundo**;
+   SFX só onde reforça uma ação, não em toda troca.
 5. **Portão de QA (obrigatório)** —
-   `python3 $MS/.claude/skills/makeshorts/scripts/qa_short.py final.mp4 --caption legenda.txt`
-   Exit 1 = não publica: corrija e rode de novo. Depois olhe 3 frames (0 s, meio, fim) para checar
-   texto sobre rosto e legenda legível — o script não vê isso.
+   `python3 $MS/.claude/skills/makeshorts/scripts/qa_short.py final.mp4 --profile divulgacao --srt legendas.srt --post legenda.txt --sheet folha.png --report qa.json`
+   Exit 1 = reprovado: corrija e rode de novo. Medição que falha = reprovado (nunca "OK" por omissão).
+   Avisos (frame 0 com pouca informação, trechos parados > 4 s) exigem olhar e justificar.
+   **O script não mede gancho, prova, pronúncia nem legenda sobre rosto** — faça a revisão humana de
+   `spec-reel.md` (inclui o teste do leitor) antes de mostrar ao Nei.
+   **Protótipo:** 1 reel aprovado pelo Nei antes de lote, publicação ou envio.
 6. **Publicar** — `references/publicar.md`: legenda, ≤ 5 hashtags específicas, rótulo de IA quando
    houver avatar/voz sintética, agendamento via Metricool MCP.
 7. **Funil** — o CTA "comente PALAVRA" só converte se a automação de DM estiver ligada:

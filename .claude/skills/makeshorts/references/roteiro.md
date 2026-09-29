@@ -11,7 +11,10 @@ Todo short segue a mesma espinha. A fórmula é que dá escala: você troca o te
 
 ## Regras
 
-- **~75 palavras** (≈30 s falados). Teto de 59 s; o ponto ideal fica entre 25 e 45 s.
+- **Tamanho pelo perfil** (`reel-profiles.json`): divulgação 60–90 palavras (20–35 s, teto 59 s); tutorial
+  90–150 (35–60 s, teto 75 s); mini-aula 150–280 (60–110 s, teto 119 s, micro-gancho a cada ~20 s).
+- **O gancho também é tela:** a frase do ato 1 aparece escrita no frame 0 (capa), não só falada.
+- **Datas/projeções** ("2027") ditas como projeção; toda afirmação com fonte.
 - **Linguagem de criança de 9 anos**: frase curta, palavra comum, zero jargão sem explicar.
 - **Uma ideia por short.** Se couber duas, são dois shorts.
 - **Novo, grande, fácil, seguro**: "acabou de sair", "grátis", "em 3 passos", "sem programar".
