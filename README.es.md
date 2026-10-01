@@ -83,7 +83,7 @@ makeshorts/
 │   │   ├── spec-visual.md            checklist de edición
 │   │   ├── publicar.md               descripción, hashtags, Metricool
 │   │   └── funil-dm.md               "comenta PALABRA" → DM (ManyChat)
-│   └── scripts/qa_short.py           control de calidad
+│   └── scripts/                      qa_short.py (video), qa_roteiro.py, qa_lote.py, legendas_palavras.py
 ├── scripts/
 │   ├── instalar.sh                   enlaza la skill + crea .env + revisa dependencias
 │   ├── voz.py                        narración (backend en MS_VOZ)
@@ -236,6 +236,9 @@ Instalación completa en Ubuntu, costos de referencia y uso con `tmux`: **[`docs
 | `scripts/voz.py --texto "…" \| --arquivo f.txt --out saida.wav [--backend edge]` | narración |
 | `scripts/transcreve.py --in audio.wav --outdir pasta [--backend groq]` | `transcript.json` + `.txt` |
 | `.claude/skills/makeshorts/scripts/qa_short.py video.mp4 [--caption f.txt] [--json]` | control de QA |
+| `.claude/skills/makeshorts/scripts/qa_roteiro.py v*.md [--profile divulgacao] [--keyword x]` | control del guion (gancho ≤ 9 palabras, apertura, palabra clave, testimonio, frase repetida) |
+| `.claude/skills/makeshorts/scripts/legendas_palavras.py palabras.json --out f.json [--srt f.srt]` | corrige subtítulos palabra por palabra (orden, duración ≤ 0) y genera SRT de 1–3 palabras |
+| `.claude/skills/makeshorts/scripts/qa_lote.py v1.mp4 v2.mp4 …` | lote: avisa portada (cuadro 0) repetida |
 
 El formato de salida de `voz.py` sigue la extensión de `--out` (`.wav`, `.mp3`…).
 

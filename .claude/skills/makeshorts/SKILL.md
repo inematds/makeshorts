@@ -12,7 +12,7 @@ description: >-
 
 Você orquestra a produção de um short vertical do tema até o post agendado. **Não reinvente etapas
 que outras skills já fazem** — chame-as pelo nome. O que é próprio desta skill: a fórmula de roteiro
-(`references/roteiro.md`), o **contrato de reel** (`references/reel-profiles.json` 1.1.0, explicado em
+(`references/roteiro.md`), o **contrato de reel** (`references/reel-profiles.json` 1.2.0, explicado em
 `references/spec-reel.md`), a especificação visual (`references/spec-visual.md`), os públicos
 (`references/publicos.md`), os portões de QA (`scripts/qa_short.py`, `scripts/qa_lote.py`) e as regras de
 publicação (`references/publicar.md`). **Por que cada regra existe:** `references/aprendizados-2026-10.md`
@@ -38,10 +38,11 @@ Descubra o modo pelo pedido; se não der, pergunte em texto livre (nunca menu).
 
 1. **Roteiro** — siga `references/roteiro.md`: **passo zero** (essência, tese, motivo, elemento demonstrável,
    regra prática) e **oficina de gancho** (5 frases, teste da lacuna, ≤ 9 palavras); 3 versões com ganchos e
-   estruturas diferentes, palavras do **perfil** escolhido (divulgação 60–110), gancho falado ≤ 2 s e já escrito na tela do frame 0,
+   estruturas diferentes, palavras do **perfil** escolhido (divulgação 60–125), gancho falado ≤ 2 s e já escrito na tela do frame 0,
    gancho secundário entre 3 e 8 s, **uma promessa por reel**, CTA único. Fatos só de fonte oficial
    (site/GitHub do tema) — abra e confira antes de escrever. Para o tom INEMA, a skill
-   **`roteirista-inema`** pode refinar a versão escolhida. **Mostre as 3 e deixe o usuário escolher.**
+   **`roteirista-inema`** pode refinar a versão escolhida. Rode **`scripts/qa_roteiro.py`** nas 3 versões
+   (gancho, abertura, palavra-chave, depoimento, CTA, frase repetida). **Mostre as 3 e deixe o usuário escolher.**
 2. **Voz / rosto** — três opções, da mais barata para a mais cara:
    - **Gravação humana** (20–30 s no celular): o usuário grava, você edita (modo 2).
    - **Voz sintética:** `python3 $MS/scripts/voz.py --arquivo roteiro.txt --out <ws>/voz/narracao.wav`
@@ -53,6 +54,10 @@ Descubra o modo pelo pedido; se não der, pergunte em texto livre (nunca menu).
    Legendas precisam de transcrição com tempo por palavra:
    `python3 $MS/scripts/transcreve.py --in <ws>/voz/narracao.wav --outdir <ws>/transcricao`
    (backend em `MS_TRANSCRICAO`: `inemavox` local, `groq`, `openai`).
+   **Sempre** normalize as palavras antes de queimar a legenda (ordena, sem duração ≤ 0) e gere o SRT de 1–3 palavras:
+   `python3 $MS/.claude/skills/makeshorts/scripts/legendas_palavras.py <ws>/transcricao/transcript.json --out <ws>/edicao/legendas.json --srt <ws>/edicao/legendas.srt`
+   **Atenção:** o backend `inemavox` exporta só frases (sem tempo por palavra) — o script recusa. Para palavra a
+   palavra local, use o caminho explicavideos (Whisper por palavra próprio); Groq/OpenAI só com autorização.
 3. **B-roll real** — enquanto a voz/avatar renderiza: capture o site e o GitHub do tema com rolagem
    suave (skills **`agent-browser`** / **`website-intelligence`**), demos/GIFs oficiais e a página do curso no
    inema.club. Mostrar a ferramenta funcionando vence card de texto. **Pelo menos 1 em cada 3 visuais é real.**
@@ -64,8 +69,9 @@ Descubra o modo pelo pedido; se não der, pergunte em texto livre (nunca menu).
      30 fps, −14 LUFS e este QA rodando sozinho no `produce.py`. É o caminho padrão para divulgação INEMA.
    - **avatar + imagens no layout empilhado aprovado → `~/projetos/promoavatar3` (`scripts/montar-reel.py`,
      `templates/empilhado-capa.json`)**, com as condições desta skill: segmentos de 2–3 s (não ~6 s), ≥ 1 prova
-     real em cada 3 imagens, palavras da legenda ordenadas (o `legendas.py` de lá ainda gera duração negativa —
-     passe `--words` no QA), loudnorm no arquivo final;
+     real em cada 3 imagens, legenda passada pelo `legendas_palavras.py` (o `legendas.py` de lá gera duração
+     negativa em ~41% dos reels), **loudnorm no arquivo final** (os reels de lá saem a ~−20 LUFS) e QA com
+     `--layout empilhado` (mede a troca de imagem no topo);
    - gravação humana 16:9 → **`reel-edita-inema`**; clipe vertical cru → **`reel-edita-inematds`**;
    - sem rosto e sem crédito de avatar → **`hyperframes`** + **`general-video`**, com prova real (gravação de
      tela/print) — nunca só cards de texto; gravação de 30 s no celular é alternativa melhor que sem rosto;
@@ -75,6 +81,7 @@ Descubra o modo pelo pedido; se não der, pergunte em texto livre (nunca menu).
    SFX só onde reforça uma ação, não em toda troca.
 5. **Portão de QA (obrigatório)** —
    `python3 $MS/.claude/skills/makeshorts/scripts/qa_short.py final.mp4 --profile divulgacao --srt legendas.srt --words legendas.json --post legenda.txt --sheet folha.png --report qa.json`
+   (+ `--layout empilhado` no layout topo/avatar/base: avisa imagem do topo parada > 3,5 s)
    (`--words` quando a legenda palavra a palavra vem em JSON: reprova palavra com duração ≤ 0, que fica presa na tela).
    **Lote:** `python3 $MS/.claude/skills/makeshorts/scripts/qa_lote.py v1.mp4 v2.mp4 …` avisa capas (quadro 0) repetidas.
    Exit 1 = reprovado: corrija e rode de novo. Medição que falha = reprovado (nunca "OK" por omissão).
@@ -87,7 +94,9 @@ Descubra o modo pelo pedido; se não der, pergunte em texto livre (nunca menu).
 7. **Funil** — o CTA "comente PALAVRA" só converte se a automação de DM estiver ligada
    (`references/funil-dm.md`). **Em 01/10/2026 não está**: use "manda pra quem…" ou "link na bio".
 8. **Medir** — skip rate (Reels), viewed vs swiped away (Shorts), % assistido e envios; 2 ganchos do mesmo
-   roteiro via Trial Reels (`publicar.md`). Sem número, nenhuma regra desta skill está provada.
+   roteiro via Trial Reels (`publicar.md`). Registre uma linha por short em
+   `~/projetos/output/makeshorts/metricas.md` (modelo em `references/metricas-modelo.md`).
+   Sem número, nenhuma regra desta skill está provada.
 
 ## Onde está o quê (`$MS`)
 

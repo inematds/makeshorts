@@ -1,6 +1,6 @@
 {
  "_doc": "Contrato único de reel (< 2 min). Lido por scripts/qa_short.py e pelo explicavideos (engine/v2, config \"profile\"). Explicação em spec-reel.md. Proporção (9:16) NÃO define o perfil: o perfil é escolha editorial.",
- "version": "1.1.0",
+ "version": "1.2.0",
  "common": {
   "video": {
    "width": 1080,
@@ -36,7 +36,8 @@
     2,
     4
    ],
-   "static_review_s": 4
+   "static_review_s": 4,
+   "image_change_max_s": 3.5
   },
   "cta": {
    "single": true,
@@ -84,13 +85,13 @@
     "min": 15,
     "ideal": [
      20,
-     45
+     50
     ],
     "max": 59
    },
    "words": [
     60,
-    110
+    125
    ],
    "structure": [
     "gancho",
@@ -142,6 +143,7 @@
   }
  },
  "_changelog": {
-  "1.1.0": "01/10/2026: divulgação ideal 20–45 s (reels de 40–50 s do promoavatar3 aprovados pelo Nei; pesquisa 2026: 35–50 s) e 60–110 palavras a ~150 palavras/min; bloqueia SRT malformado/invertido e palavra com duração ≤ 0 ou sobreposta (--words)."
+  "1.1.0": "01/10/2026: divulgação ideal 20–45 s (reels de 40–50 s do promoavatar3 aprovados pelo Nei; pesquisa 2026: 35–50 s) e 60–110 palavras a ~150 palavras/min; bloqueia SRT malformado/invertido e palavra com duração ≤ 0 ou sobreposta (--words).",
+  "1.2.0": "01/10/2026: divulgação ideal 20–50 s e 60–125 palavras — os roteiros aprovados do promoavatar3 têm 111–134 palavras (45–53 s); troca de imagem no topo (layout empilhado) avisa acima de 3,5 s (rhythm.image_change_max_s)."
  }
 }

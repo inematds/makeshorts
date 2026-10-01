@@ -89,6 +89,25 @@ def frame0_information(path):
     return edges / ((w - 2) * (h - 2))
 
 
+def band_changes(path, top_frac, fps=4, thr=15.0, merge_s=0.5):
+    """Instantes em que a IMAGEM da faixa de cima troca (layout empilhado: topo = 704/1920).
+    Limiar calibrado no C184 do promoavatar3: troca de imagem dá 19–142, pulso de brilho/zoom 4–5."""
+    w, h = 90, max(8, round(160 * top_frac))
+    r = subprocess.run(["ffmpeg", "-v", "error", "-i", path, "-vf",
+                        f"fps={fps},crop=iw:ih*{top_frac:.4f}:0:0,scale={w}:{h},format=gray", "-f", "rawvideo", "-"],
+                       capture_output=True)
+    if r.returncode != 0 or not r.stdout:
+        raise MeasureError("faixa do topo: não foi possível decodificar")
+    n = w * h
+    frames = [r.stdout[i:i + n] for i in range(0, len(r.stdout) - n + 1, n)]
+    ts = []
+    for k in range(1, len(frames)):
+        a, b = frames[k - 1], frames[k]
+        if sum(abs(a[i] - b[i]) for i in range(n)) / n > thr and (not ts or k / fps - ts[-1] > merge_s):
+            ts.append(k / fps)
+    return ts
+
+
 def static_gaps(path, dur, limit, fps=2, thr=6.0):
     """Intervalos sem mudança visual maiores que `limit` s. Amostra 2 quadros/s (90x160, cinza) e marca
     mudança quando a diferença média para a amostra anterior passa de `thr` (0–255). Pega fade e corte;
@@ -169,6 +188,7 @@ def main():
     ap.add_argument("video")
     ap.add_argument("--profile", default="divulgacao")
     ap.add_argument("--srt", help="legendas do vídeo (SRT) para conferir 1–3 palavras e sobreposição")
+    ap.add_argument("--layout", choices=["empilhado"], help="empilhado: mede a troca de imagem na faixa de cima (0–704 px)")
     ap.add_argument("--words", help="legenda palavra a palavra em JSON (start + dur|end): reprova duração ≤ 0 e sobreposição")
     ap.add_argument("--post", "--caption", dest="post", help="texto do POST (legenda da rede), não a legenda do vídeo")
     ap.add_argument("--sheet", help="grava a folha de quadros (0 s, 2 s, 5 s, meio, fim)")
@@ -248,6 +268,20 @@ def main():
                     + ", ".join(f"{x}–{y}s" for x, y in gaps) + " — justificar ou quebrar")
             else:
                 add("OK", "trechos parados", f"nenhum acima de {common['rhythm']['static_review_s']} s")
+
+    if a.layout == "empilhado":
+        lim = common["rhythm"].get("image_change_max_s", 3.5)
+        ch = measure("troca de imagem (topo)", lambda: band_changes(a.video, 704 / 1920))
+        if ch is not None:
+            pts = [0.0] + ch + [dur]
+            ints = [round(y - x, 1) for x, y in zip(pts, pts[1:])]
+            longos = [(round(x, 1), round(y - x, 1)) for x, y in zip(pts, pts[1:]) if y - x > lim]
+            med = sorted(ints)[len(ints) // 2]
+            if longos:
+                add("AVISO", "troca de imagem (topo)", f"mediana {med} s; {len(longos)} trechos acima de {lim} s: "
+                    + ", ".join(f"{x}s (+{g}s)" for x, g in longos) + " — imagem nova a cada 2–3 s; pulso de brilho não conta")
+            else:
+                add("OK", "troca de imagem (topo)", f"{len(ch)} trocas, mediana {med} s")
 
     if a.srt:
         cues, bad = measure("legendas (leitura)", lambda: _read(parse_srt, a.srt)) or ([], ["ilegível"])

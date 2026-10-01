@@ -10,7 +10,7 @@ Origem: análise dos 5 vídeos reprovados em 28/09/2026 e revisão do Codex Astr
 
 | Perfil | Duração (mín · ideal · máx) | Palavras | Estrutura |
 |---|---|---|---|
-| `divulgacao` | 15 · 20–45 · 59 s | 60–110 | gancho → prova → CTA |
+| `divulgacao` | 15 · 20–50 · 59 s | 60–125 | gancho → prova → CTA |
 | `tutorial` | 25 · 35–60 · 75 s | 90–150 | gancho → 3 passos → CTA |
 | `mini-aula` | 45 · 60–110 · 119 s | 150–280 | gancho → loop aberto → 3–5 pontos (micro-gancho a cada ~20 s) → fecha o loop → CTA |
 

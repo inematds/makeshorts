@@ -56,8 +56,8 @@ divulgação) → ENGAJAMENTO (um só) → CTA.
 
 ## Regras
 
-- **Tamanho pelo perfil** (`reel-profiles.json` 1.1.0, ~150 palavras/min): divulgação 60–110 palavras
-  (ideal 20–45 s); tutorial 90–150 (35–60 s); mini-aula 150–280 (60–110 s, micro-gancho a cada ~20 s).
+- **Tamanho pelo perfil** (`reel-profiles.json` 1.2.0, ~150 palavras/min): divulgação 60–125 palavras
+  (ideal 20–50 s); tutorial 90–150 (35–60 s); mini-aula 150–280 (60–110 s, micro-gancho a cada ~20 s).
   Leia em voz alta no ritmo de fala antes de fechar.
 - **Uma ideia por short.** Tema com 9 partes = série de 9 shorts.
 - **Escreva para uma pessoa, como cena em 2ª pessoa** ("você abre o celular e…"). **Nunca invente
@@ -84,7 +84,12 @@ divulgação) → ENGAJAMENTO (um só) → CTA.
 > 3. **3 versões** do roteiro, cada uma com gancho e estrutura diferentes, e a linha PROVA dizendo o que
 >    aparece na tela.
 > 4. Para cada versão: título do post (benefício, ≤ 40 caracteres, com a palavra-chave), CTA e palavra-chave.
-> 5. Diga qual você gravaria e por quê. **Mostre as 3 ao Nei e deixe ele escolher.**
+> 5. Grave cada versão em `<workspace>/roteiro/v1.md`, `v2.md`, `v3.md`, com a fala sob `### FALA` (formato do
+>    promoavatar3; sobreposições sob `### SOBREPOSIÇÕES`) e rode o portão mecânico:
+>    `python3 $MS/.claude/skills/makeshorts/scripts/qa_roteiro.py <ws>/roteiro/v*.md --profile divulgacao --keyword <palavra>`
+>    — gancho > 9 palavras, abertura proibida ou palavra-chave tardia reprovam; depoimento/bastidor e frase
+>    repetida entre versões pedem revisão.
+> 6. Diga qual você gravaria e por quê. **Mostre as 3 ao Nei e deixe ele escolher.**
 
 Por que 3 versões: a primeira quase nunca é a melhor; o gancho de uma com a entrega de outra costuma
 vencer. Depois de aprovado o formato, 2 ganchos do mesmo roteiro viram teste A/B (Trial Reels, `publicar.md`).

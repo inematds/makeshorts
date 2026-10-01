@@ -154,3 +154,109 @@ def test_lote_sem_repeticao():
     a, b = make("lote-c"), make("lote-d", busy=False)
     code, rep = lote(a, b)
     assert code == 0 and not rep["repetidos"], rep
+
+
+# --- 1.2.0: faixa do topo (layout empilhado), legendas_palavras.py, qa_roteiro.py ---
+
+SCRIPTS = Path(__file__).resolve().parents[1] / ".claude/skills/makeshorts/scripts"
+
+
+def cores(name, cores_, seg):
+    """Vídeo 1080x1920 trocando de cor a cada `seg` s (simula imagem nova no topo)."""
+    out = TMP / f"{name}.mp4"
+    ins, fil = [], ""
+    for i, c in enumerate(cores_):
+        ins += ["-f", "lavfi", "-i", f"color=c={c}:size=1080x1920:rate=30:d={seg}"]
+        fil += f"[{i}:v]"
+    dur = seg * len(cores_)
+    cmd = ["ffmpeg", "-nostdin", "-y", "-loglevel", "error", *ins, "-f", "lavfi", "-i", f"sine=frequency=440:duration={dur}",
+           "-filter_complex", fil + f"concat=n={len(cores_)}:v=1:a=0[v]", "-map", "[v]", "-map", f"{len(cores_)}:a",
+           "-c:v", "libx264", "-pix_fmt", "yuv420p", "-af", "loudnorm=I=-14:TP=-1.5:LRA=11", "-c:a", "aac", "-ar", "48000",
+           "-shortest", str(out)]
+    subprocess.run(cmd, check=True)
+    return out
+
+
+def test_topo_trocando_a_cada_2s_passa():
+    code, c = qa(cores("topo-ok", ["red", "white", "black", "yellow", "navy", "silver", "maroon", "lime"], 2), "--layout", "empilhado")
+    assert c["troca de imagem (topo)"] == "OK", c
+
+
+def test_topo_parado_pede_revisao():
+    code, c = qa(cores("topo-parado", ["red", "white", "black"], 6), "--layout", "empilhado")
+    assert c["troca de imagem (topo)"] == "AVISO", c
+
+
+def test_legendas_palavras_corrige_duracao_negativa():
+    src = palavras("bruto", [(24.7, -0.06, "APARECER"), (24.64, 0.3, "SEU"), (25.0, 0.4, "AGENTE")])
+    out = TMP / "corrigido.json"
+    srt_out = TMP / "corrigido.srt"
+    r = subprocess.run([sys.executable, str(SCRIPTS / "legendas_palavras.py"), str(src), "--out", str(out), "--srt", str(srt_out)],
+                       capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    ws = json.loads(out.read_text())
+    assert [w["palavra"] for w in ws] == ["SEU", "APARECER", "AGENTE"]       # ordenado por início
+    assert all(w["dur"] > 0 for w in ws)
+    assert all(a["start"] + a["dur"] <= b["start"] + 1e-6 for a, b in zip(ws, ws[1:]))
+    code, c = qa(make("pal-corr"), "--words", str(out), "--srt", str(srt_out))
+    assert c["palavras (tempo)"] == "OK" and c["legendas (estrutura)"] == "OK" and c["legendas (palavras)"] == "OK", c
+
+
+def roteiro(name, fala):
+    p = TMP / f"{name}.md"
+    p.write_text(f"Tipo: pro\n\n### FALA\n{fala}\n\n### SOBREPOSIÇÕES\nATENÇÃO: x\n")
+    return p
+
+
+def qr(*args):
+    r = subprocess.run([sys.executable, str(SCRIPTS / "qa_roteiro.py"), "--json", *map(str, args)], capture_output=True, text=True)
+    rep = json.loads(r.stdout)
+    return r.returncode, rep
+
+
+BOM = ("Você paga por algo que já é grátis. "
+       "O curso de agentes do INEMA é aberto, sem cadastro, direto no navegador. "
+       "Em três passos: abre o inema.club, escolhe a trilha de agentes e faz a primeira aula hoje. "
+       "Cada aula tem exemplo pronto pra copiar e testar no seu trabalho. "
+       "Quem faz a primeira aula hoje sai sabendo montar um agente simples que responde e-mail. "
+       "Manda pra quem ainda paga por isso.")
+
+
+def test_roteiro_bom_passa():
+    code, rep = qr(roteiro("r-bom", BOM), "--keyword", "agentes")
+    itens = {c["item"]: c["status"] for c in rep["arquivos"][0]["checks"]}
+    assert code == 0, rep
+    assert itens["gancho (palavras)"] == "OK" and itens["palavra-chave no início"] == "OK"
+
+
+def test_roteiro_gancho_longo_e_abertura_proibida_falham():
+    code, rep = qr(roteiro("r-ruim", "Olá pessoal, neste vídeo eu vou mostrar uma coisa muito interessante sobre inteligência artificial. " + BOM))
+    itens = {c["item"]: c["status"] for c in rep["arquivos"][0]["checks"]}
+    assert code == 1 and itens["gancho (palavras)"] == "FALHA" and itens["abertura proibida"] == "FALHA"
+
+
+def test_roteiro_depoimento_e_bastidor_pedem_revisao():
+    code, rep = qr(roteiro("r-dep", "Pare de pagar agência. Ontem eu testei e ninguém dublou nada. " + BOM))
+    itens = {c["item"]: c["status"] for c in rep["arquivos"][0]["checks"]}
+    assert itens["depoimento/bastidor"] == "AVISO", itens
+
+
+def test_roteiro_palavra_chave_tardia_falha():
+    code, rep = qr(roteiro("r-kw", BOM), "--keyword", "trilha")
+    itens = {c["item"]: c["status"] for c in rep["arquivos"][0]["checks"]}
+    assert code == 1 and itens["palavra-chave no início"] == "FALHA"
+
+
+def test_lote_de_roteiros_acusa_frase_repetida():
+    a = roteiro("r-a", BOM)
+    b = roteiro("r-b", "Pare de testar ferramenta toda semana. " + BOM)
+    code, rep = qr(a, b)
+    assert rep["frases_repetidas"], rep
+
+
+def test_legendas_palavras_recusa_transcricao_so_com_frases():
+    p = TMP / "segmentos.json"
+    p.write_text(json.dumps([{"start": 0, "end": 2, "text": "frase inteira sem palavras"}]))
+    r = subprocess.run([sys.executable, str(SCRIPTS / "legendas_palavras.py"), str(p), "--out", str(TMP / "x.json")],
+                       capture_output=True, text=True)
+    assert r.returncode != 0 and "sem tempo por palavra" in r.stderr

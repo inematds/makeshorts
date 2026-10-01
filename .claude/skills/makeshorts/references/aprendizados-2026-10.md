@@ -26,6 +26,15 @@ Relatórios completos: `~/projetos/wifi/RELATORIO-CAPACIDADE-VIDEO-VIRAL-2026-10
 - **explicavideos** — conteúdo mais útil (aulas reais, avatar do Nei); modo reel corrigido na 2.4.5 (QA por bloco,
   recibo com impressão, strict exigido). Motor padrão para divulgação INEMA.
 
+## Medido com as ferramentas novas (1.2.0, 01/10/2026)
+- [local] C184 do promoavatar3: imagem do topo parada 9,0 s, 5,5 s, **16,2 s** e 9,5 s (`--layout empilhado`);
+  áudio a **−20,5 LUFS** (plataformas normalizam em ~−14: toca baixo); depois do `legendas_palavras.py`, 0 palavras
+  com duração ≤ 0 e SRT de 43 cues com ≤ 3 palavras.
+- [local] 36 roteiros do C184 (`qa_roteiro.py`): 5 com gancho > 9 palavras; "A IA pode ser igual à de todo
+  mundo" repetida em **9 roteiros** (risco de template repetitivo); os aprovados têm 111–134 palavras (45–53 s) →
+  contrato 1.2.0 com divulgação ideal 20–50 s / 60–125 palavras.
+- [local] O backend local `inemavox` só dá tempo por frase; legenda palavra a palavra local hoje só pelo explicavideos.
+
 ## O que as redes premiam em 2026
 
 - "AI slop" saturou: ~60% do que o TikTok mostra a contas novas é slop [medido, Kapwing/TNW 21/06/2026,
