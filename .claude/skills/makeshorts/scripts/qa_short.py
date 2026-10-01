@@ -113,15 +113,39 @@ def parse_srt(path):
     def sec(t):
         h, m, s = t.replace(",", ".").split(":")
         return int(h) * 3600 + int(m) * 60 + float(s)
-    cues = []
+    cues, bad = [], []
     for block in re.split(r"\n\s*\n", Path(path).read_text(encoding="utf-8").strip()):
         lines = [l for l in block.splitlines() if l.strip()]
         m = next((re.match(r"(\S+)\s*-->\s*(\S+)", l) for l in lines if "-->" in l), None)
-        if not m:
+        try:
+            a, b = sec(m.group(1)), sec(m.group(2))
+        except (AttributeError, ValueError):
+            bad.append(block.strip()[:40])        # bloco sem tempo legível: antes era ignorado em silêncio
             continue
         text = " ".join(l for l in lines[lines.index(m.string) + 1:])
-        cues.append((sec(m.group(1)), sec(m.group(2)), text))
-    return cues
+        cues.append((a, b, text))
+    return cues, bad
+
+
+def parse_words(path):
+    """Legenda palavra a palavra em JSON: lista de {start, dur|end, palavra|word} (formato do promoavatar3)."""
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    if isinstance(data, dict):
+        data = data.get("palavras") or data.get("words") or []
+    out = []
+    for w in data:
+        ini = float(w["start"])
+        fim = float(w["end"]) if "end" in w else ini + float(w["dur"])
+        out.append((ini, fim, str(w.get("palavra", w.get("word", "")))))
+    return out
+
+
+def _read(fn, path):
+    """Leitura de arquivo auxiliar: erro de leitura vira medição não feita (FALHA), nunca exceção sem relatório."""
+    try:
+        return fn(path)
+    except (OSError, ValueError, KeyError, TypeError) as e:
+        raise MeasureError(f"{Path(path).name}: {e}")
 
 
 def contact_sheet(path, dur, out):
@@ -145,6 +169,7 @@ def main():
     ap.add_argument("video")
     ap.add_argument("--profile", default="divulgacao")
     ap.add_argument("--srt", help="legendas do vídeo (SRT) para conferir 1–3 palavras e sobreposição")
+    ap.add_argument("--words", help="legenda palavra a palavra em JSON (start + dur|end): reprova duração ≤ 0 e sobreposição")
     ap.add_argument("--post", "--caption", dest="post", help="texto do POST (legenda da rede), não a legenda do vídeo")
     ap.add_argument("--sheet", help="grava a folha de quadros (0 s, 2 s, 5 s, meio, fim)")
     ap.add_argument("--json", action="store_true")
@@ -225,7 +250,14 @@ def main():
                 add("OK", "trechos parados", f"nenhum acima de {common['rhythm']['static_review_s']} s")
 
     if a.srt:
-        cues = parse_srt(a.srt)
+        cues, bad = measure("legendas (leitura)", lambda: _read(parse_srt, a.srt)) or ([], ["ilegível"])
+        inv = [c for c in cues if c[1] <= c[0] or c[0] < 0]
+        if bad or inv:
+            add("FALHA", "legendas (estrutura)", f"{len(bad)} blocos sem tempo legível, {len(inv)} cues com fim ≤ início"
+                + (f" — ex.: {inv[0][0]:.2f}→{inv[0][1]:.2f}s" if inv else ""))
+        else:
+            add("OK", "legendas (estrutura)", f"{len(cues)} cues")
+        cues = sorted(cues)
         if not cues:
             add("FALHA", "legendas", "SRT vazio ou ilegível")
         else:
@@ -238,6 +270,20 @@ def main():
             fim = cues[-1][1]
             if fim < dur - 3:
                 add("AVISO", "legendas (cobertura)", f"última legenda termina em {fim:.1f}s de {dur:.1f}s")
+
+    if a.words:
+        ws = measure("palavras (leitura)", lambda: _read(parse_words, a.words))
+        if ws is not None:
+            neg = [w for w in ws if w[1] <= w[0]]
+            ws = sorted(ws)
+            sob = [(p, q) for p, q in zip(ws, ws[1:]) if q[0] < p[1] - 0.01]
+            if not ws:
+                add("FALHA", "palavras (tempo)", "nenhuma palavra no arquivo")
+            elif neg or sob:
+                ex = f"“{neg[0][2]}” {neg[0][0]:.2f}s dur {neg[0][1] - neg[0][0]:.2f}" if neg else f"“{sob[0][0][2]}”/“{sob[0][1][2]}”"
+                add("FALHA", "palavras (tempo)", f"{len(neg)} com duração ≤ 0 (ficam presas na tela), {len(sob)} sobrepostas — ex.: {ex}")
+            else:
+                add("OK", "palavras (tempo)", f"{len(ws)} palavras, sem duração ≤ 0 nem sobreposição")
 
     if a.post:
         txt = Path(a.post).read_text(encoding="utf-8")

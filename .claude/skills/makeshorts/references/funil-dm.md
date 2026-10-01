@@ -9,6 +9,10 @@ short com CTA "Comenta IA"  →  pessoa comenta "IA"  →  resposta pública no 
                                                     →  follow-up se não clicou
 ```
 
+> **Estado em 01/10/2026: funil NÃO configurado.** O plano grátis do ManyChat caiu para 25 contatos ativos/mês
+> depois de 03/2026 [blog] — para o volume do INEMA exige plano pago, e o conteúdo é gratuito. Até o Nei decidir,
+> **não use "comente PALAVRA"**: use "manda pra quem…" (Instagram) ou "link na bio".
+
 ## Configuração (ManyChat, Instagram/Facebook) — feita uma vez, à mão
 1. Conta Instagram **profissional** ligada a uma página do Facebook; conectar no ManyChat.
 2. **Automation → New automation → "Auto DM from comments"**.

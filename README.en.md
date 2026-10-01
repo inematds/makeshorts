@@ -126,7 +126,7 @@ Everything in **one file**: `.env` at the repo root (or `~/.config/makeshorts/.e
 | `MS_AVATAR` | `heygen` · `nenhum` | `nenhum` |
 | `MS_PUBLICAR` | `metricool` · `manual` | `metricool` |
 | `MS_SAIDA` | output folder | `~/projetos/output/makeshorts` |
-| `INEMAVOX_REF` | reference .wav of the local cloned voice | `rachel.wav` |
+| `INEMAVOX_REF` | reference .wav of the local cloned voice | `nei.wav` (Nei’s voice) |
 | `EDGE_VOZ` | Edge voice (`pt-BR-AntonioNeural`, `pt-BR-FranciscaNeural`…) | Antonio |
 | `OPENAI_TTS_MODELO` / `OPENAI_TTS_VOZ` | OpenAI model and voice | `gpt-4o-mini-tts` / `onyx` |
 | `ELEVENLABS_VOICE_ID` / `ELEVENLABS_MODELO` | your cloned voice | — / `eleven_multilingual_v2` |

@@ -103,3 +103,54 @@ if __name__ == "__main__":
             except AssertionError as e:
                 fails += 1; print("FAIL", name, e)
     sys.exit(1 if fails else 0)
+
+
+# --- 1.1.0 (01/10/2026): legenda palavra a palavra (JSON do promoavatar3), SRT malformado, lote ---
+
+def palavras(name, words):
+    p = TMP / f"{name}.json"
+    p.write_text(json.dumps([{"start": s, "dur": d, "palavra": w} for s, d, w in words]))
+    return p
+
+
+def test_palavras_ok_passam():
+    code, c = qa(make("pal-ok"), "--words", str(palavras("ok", [(0.0, 0.4, "ISSO"), (0.4, 0.5, "CUSTA"), (0.9, 0.6, "ZERO")])))
+    assert code == 0 and c["palavras (tempo)"] == "OK", c
+
+
+def test_palavra_com_duracao_negativa_falha():
+    # o bug do promoavatar3 (legendas.py:113): ASR fora de ordem → dur negativa → palavra presa na tela
+    code, c = qa(make("pal-neg"), "--words", str(palavras("neg", [(24.7, -0.06, "APARECER"), (24.64, 0.3, "SEU")])))
+    assert code == 1 and c["palavras (tempo)"] == "FALHA", c
+
+
+def test_palavras_sobrepostas_falham():
+    code, c = qa(make("pal-sob"), "--words", str(palavras("sob", [(0.0, 1.0, "UMA"), (0.5, 0.4, "DUAS")])))
+    assert code == 1 and c["palavras (tempo)"] == "FALHA", c
+
+
+def test_srt_invertido_ou_malformado_falha():
+    p = TMP / "invertido.srt"
+    p.write_text("1\n00:00:02,000 --> 00:00:01,000\nvolta\n\n2\nsem tempo nenhum\ntexto\n")
+    code, c = qa(make("srt-inv"), "--srt", str(p))
+    assert code == 1 and c["legendas (estrutura)"] == "FALHA", c
+
+
+LOTE = Path(__file__).resolve().parents[1] / ".claude/skills/makeshorts/scripts/qa_lote.py"
+
+
+def lote(*videos):
+    r = subprocess.run([sys.executable, str(LOTE), "--json", *map(str, videos)], capture_output=True, text=True)
+    return r.returncode, json.loads(r.stdout)
+
+
+def test_lote_acusa_frame0_repetido():
+    a, b = make("lote-a"), make("lote-b")          # mesmo testsrc2 → frame 0 idêntico
+    code, rep = lote(a, b)
+    assert code == 0 and rep["repetidos"], rep    # aviso, não reprova
+
+
+def test_lote_sem_repeticao():
+    a, b = make("lote-c"), make("lote-d", busy=False)
+    code, rep = lote(a, b)
+    assert code == 0 and not rep["repetidos"], rep

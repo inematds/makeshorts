@@ -10,7 +10,7 @@ Origem: análise dos 5 vídeos reprovados em 28/09/2026 e revisão do Codex Astr
 
 | Perfil | Duração (mín · ideal · máx) | Palavras | Estrutura |
 |---|---|---|---|
-| `divulgacao` | 15 · 20–35 · 59 s | 60–90 | gancho → prova → CTA |
+| `divulgacao` | 15 · 20–45 · 59 s | 60–110 | gancho → prova → CTA |
 | `tutorial` | 25 · 35–60 · 75 s | 90–150 | gancho → 3 passos → CTA |
 | `mini-aula` | 45 · 60–110 · 119 s | 150–280 | gancho → loop aberto → 3–5 pontos (micro-gancho a cada ~20 s) → fecha o loop → CTA |
 
@@ -23,22 +23,28 @@ Origem: análise dos 5 vídeos reprovados em 28/09/2026 e revisão do Codex Astr
 - sem áudio; loudness fora de −14 ±1 LUFS;
 - **qualquer medição que não pôde ser feita** (erro de ffmpeg nunca vira "OK");
 - tela preta no início;
-- legendas (`--srt`): cue com mais de 3 palavras; cues sobrepostos.
+- legendas (`--srt`): cue com mais de 3 palavras; cues sobrepostos; bloco sem tempo legível ou cue com fim ≤ início;
+- legenda palavra a palavra (`--words`, JSON `start` + `dur|end`): palavra com duração ≤ 0 (fica presa na tela) ou sobreposta.
+
+No lote, `scripts/qa_lote.py` **avisa** vídeos com o mesmo quadro 0 (capa repetida = risco de "template repetitivo" no YouTube).
 
 ## Pede revisão (aviso — alguém olha e justifica)
 
 - duração fora da faixa ideal; true peak > −1 dBTP;
 - **frame 0 com pouca informação** (heurística de bordas: letra solta, fundo vazio). Rosto passa na heurística e ainda assim pode não ter gancho — por isso é revisão, não aprovação;
-- **trechos parados > 4 s** (amostra 2 quadros/s; avatar falando não conta como mudança). Lista os intervalos;
+- **trechos parados > 4 s** (amostra 2 quadros/s; avatar falando não conta como mudança). Lista os intervalos.
+  **Limite conhecido:** já marcou como parado um vídeo inteiro com legenda correndo (`gestao-ia.mp4`) — olhe a
+  folha de quadros antes de concluir;
 - texto do post sem CTA reconhecido.
 
 ## O QA NÃO mede (revisão humana obrigatória antes de mostrar ao Nei)
 
-1. **Gancho:** o frame 0 já diz a promessa/tensão em 3–6 palavras? Benefício ou problema claro até 2 s?
+1. **Gancho:** o frame 0 já diz a promessa/tensão em 3–6 palavras? Benefício ou problema claro até 2 s? Passa no teste da lacuna (`roteiro.md`)?
 2. **Prova:** objeto real (site, curso, ferramenta rodando) aparece até 5 s? Imagem gerada **não** prova funcionamento.
 3. **Pronúncia:** ouvir o áudio inteiro. Transcrição (ASR) ajuda a achar palavra sumida, não aprova pronúncia.
 4. **Composição:** legenda sobre rosto ou sobre a prova; recorte do rosto nas transições.
-5. **Teste do leitor:** alguém que não escreveu o roteiro assiste 1 vez e responde: o que ganho? qual foi a prova? qual o próximo passo? Três respostas certas ou volta.
+5. **Honestidade:** tudo o que o vídeo diz sobre si mesmo e sobre o Nei é verdade (nada de "ninguém dublou", "custou zero", depoimento inventado)? Cena gerada tem rótulo e não parece notícia real?
+6. **Teste do leitor:** alguém que não escreveu o roteiro assiste 1 vez e responde: o que ganho? qual foi a prova? qual o próximo passo? Três respostas certas ou volta.
 
 ## Regras editoriais (não medidas)
 
