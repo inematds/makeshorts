@@ -187,6 +187,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("video")
     ap.add_argument("--profile", default="divulgacao")
+    ap.add_argument("--profiles", help="arquivo reel-profiles.json alternativo (o mesmo que o explicavideos usa)")
     ap.add_argument("--srt", help="legendas do vídeo (SRT) para conferir 1–3 palavras e sobreposição")
     ap.add_argument("--layout", choices=["empilhado"], help="empilhado: mede a troca de imagem na faixa de cima (0–704 px)")
     ap.add_argument("--words", help="legenda palavra a palavra em JSON (start + dur|end): reprova duração ≤ 0 e sobreposição")
@@ -195,6 +196,9 @@ def main():
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--report", help="grava o relatório JSON neste arquivo")
     a = ap.parse_args()
+    global PROFILES
+    if a.profiles:
+        PROFILES = Path(a.profiles)
     common, prof, version = load_profile(a.profile)
 
     res = []
@@ -246,7 +250,7 @@ def main():
             add("OK" if ok else "FALHA", "loudness", f"{lufs:.1f} LUFS" + ("" if ok else
                 f" — normalizar para {ca['lufs']} ±{ca['lufs_tolerance']} (ffmpeg -af loudnorm=I=-14:TP=-1.5:LRA=11)"))
             if tp is None:
-                add("AVISO", "true peak", "não medido")
+                add("FALHA", "true peak", "não medido — medição obrigatória")
             elif tp > ca["true_peak_max"]:
                 add("AVISO", "true peak", f"{tp:.1f} dBTP — manter ≤ {ca['true_peak_max']}")
 
@@ -285,7 +289,7 @@ def main():
 
     if a.srt:
         cues, bad = measure("legendas (leitura)", lambda: _read(parse_srt, a.srt)) or ([], ["ilegível"])
-        inv = [c for c in cues if c[1] <= c[0] or c[0] < 0]
+        inv = [c for c in cues if c[1] <= c[0] or c[0] < 0 or c[0] > dur + 0.5]   # fim ≤ início ou cue além do vídeo
         if bad or inv:
             add("FALHA", "legendas (estrutura)", f"{len(bad)} blocos sem tempo legível, {len(inv)} cues com fim ≤ início"
                 + (f" — ex.: {inv[0][0]:.2f}→{inv[0][1]:.2f}s" if inv else ""))
@@ -318,6 +322,9 @@ def main():
                 add("FALHA", "palavras (tempo)", f"{len(neg)} com duração ≤ 0 (ficam presas na tela), {len(sob)} sobrepostas — ex.: {ex}")
             else:
                 add("OK", "palavras (tempo)", f"{len(ws)} palavras, sem duração ≤ 0 nem sobreposição")
+
+    if not a.srt and not getattr(a, "words", None):
+        add("AVISO", "legendas", "não verificadas (passe --srt ou --words); reel sem legenda conferida não vai pro Nei")
 
     if a.post:
         txt = Path(a.post).read_text(encoding="utf-8")
