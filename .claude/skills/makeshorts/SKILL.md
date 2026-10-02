@@ -56,8 +56,8 @@ Descubra o modo pelo pedido; se não der, pergunte em texto livre (nunca menu).
    (backend em `MS_TRANSCRICAO`: `inemavox` local, `groq`, `openai`).
    **Sempre** normalize as palavras antes de queimar a legenda (ordena, sem duração ≤ 0) e gere o SRT de 1–3 palavras:
    `python3 $MS/.claude/skills/makeshorts/scripts/legendas_palavras.py <ws>/transcricao/transcript.json --out <ws>/edicao/legendas.json --srt <ws>/edicao/legendas.srt`
-   **Atenção:** o backend `inemavox` exporta só frases (sem tempo por palavra) — o script recusa. Para palavra a
-   palavra local, use o caminho explicavideos (Whisper por palavra próprio); Groq/OpenAI só com autorização.
+   O backend `inemavox` grava o tempo por palavra desde 02/10/2026 (`transcrever_v1.py --words`, local na GPU);
+   transcrição antiga, só com frases, o script recusa com mensagem clara. Groq/OpenAI só com autorização.
 3. **B-roll real** — enquanto a voz/avatar renderiza: capture o site e o GitHub do tema com rolagem
    suave (skills **`agent-browser`** / **`website-intelligence`**), demos/GIFs oficiais e a página do curso no
    inema.club. Mostrar a ferramenta funcionando vence card de texto. **Pelo menos 1 em cada 3 visuais é real.**

@@ -33,7 +33,7 @@ Relatórios completos: `~/projetos/wifi/RELATORIO-CAPACIDADE-VIDEO-VIRAL-2026-10
 - [local] 36 roteiros do C184 (`qa_roteiro.py`): 5 com gancho > 9 palavras; "A IA pode ser igual à de todo
   mundo" repetida em **9 roteiros** (risco de template repetitivo); os aprovados têm 111–134 palavras (45–53 s) →
   contrato 1.2.0 com divulgação ideal 20–50 s / 60–125 palavras.
-- [local] O backend local `inemavox` só dá tempo por frase; legenda palavra a palavra local hoje só pelo explicavideos.
+- [local] O backend local `inemavox` só dava tempo por frase; desde 02/10/2026 `transcrever_v1.py --words` grava o tempo por palavra (GPU; 126 palavras em 50 s do C184).
 
 ## O que as redes premiam em 2026
 

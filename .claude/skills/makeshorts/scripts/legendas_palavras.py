@@ -32,7 +32,7 @@ def load(path):
         data, wrap, outer = [w for seg in data for w in seg.get("words") or []], None, None
     if data and not any(k in data[0] for k in ("palavra", "word")):
         raise ValueError("sem tempo por palavra (só segmentos/frases — o inemavox exporta assim). "
-                         "Use a transcrição por palavra do explicavideos ou Groq/OpenAI com autorização")
+                         "Rode de novo: transcreve.py (inemavox com --words) ou transcrever_v1.py --words")
     return data, wrap, outer
 
 

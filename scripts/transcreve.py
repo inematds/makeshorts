@@ -47,7 +47,7 @@ def main():
         vox = Path(c.get("INEMAVOX_DIR", "~/projetos/inemavox")).expanduser()
         py = vox / "venv/bin/python"
         subprocess.run([str(py if py.exists() else "python3"), "transcrever_v1.py", "--in", str(ent),
-                        "--outdir", str(out), "--whisper-model", "large-v3"], cwd=vox, check=True)
+                        "--outdir", str(out), "--whisper-model", "large-v3", "--words"], cwd=vox, check=True)
         print(f"OK transcrição (inemavox) → {out}")
         return
 
