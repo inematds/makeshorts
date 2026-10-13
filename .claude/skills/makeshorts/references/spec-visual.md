@@ -14,13 +14,13 @@ O Nei aprova este layout nos reels do promoavatar3; use-o como padrão para "ava
 
 | Faixa | Altura (px) | Conteúdo |
 |---|---|---|
-| **Topo** | 0–704 | prova ou imagem do tema; manchete 76 px peso 900, caixa alta, 2 linhas ≤ 5 palavras, 2ª linha em âmbar `#F5A623`, a 56 px do pé da faixa |
+| **Topo** | 0–704 | prova ou imagem do tema; manchete 76 px peso 900, caixa alta, 2 linhas ≤ 5 palavras, 2ª linha em âmbar `#FACC15`, a 56 px do pé da faixa |
 | **Meio** | 704–1312 | avatar/rosto (`object-fit: cover`), dono do áudio; legenda palavra a palavra 86 px, Montserrat Black, contorno preto 8 px, 28 px acima da base da faixa |
 | **Base** | 1312–1920 | painel com a frase-resumo 66 px peso 800, palavra-chave em âmbar — **ou** a prova (print/tela) quando o topo é a imagem; não deixar 600 px de fundo vazio |
 
 Variantes do mesmo template: **díptico** (imagem e avatar com 960 px cada) e **imagem-plena** (prova em
 tela cheia, avatar em PiP no canto superior direito) — esta é a melhor para gravação de tela.
-Fundo `#0E1116`, texto `#FFF`, acento `#F5A623`.
+Fundo `#0E1116`, texto `#FFF`, acento `#FACC15`.
 
 ## Os primeiros 3 segundos
 - 🤖 **Imagem desde o quadro 0** — nada de tela preta (bloqueia) nem quadro vazio/letra solta (aviso).
